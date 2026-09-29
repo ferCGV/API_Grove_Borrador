@@ -37,6 +37,6 @@ class CreateService(SQLModel):
     price:float
     duracion_minutos:int
 
-class Service(CreateService):
+class ServiceResponse(CreateService):
     id:int
 
