@@ -1,9 +1,11 @@
-from fastapi import FastAPI
-from database import create_db_and_tables,session_dep
-from models import Service,Barber,User
+from fastapi import FastAPI,HTTPException,Query
+from db.database import create_db_and_tables,session_dep
+from db.models import Service,Barber,User
 from schemas import CreateService,ServiceResponse,BarberResponse,CreateBarber
 
-from sqlmodel import select
+from db.crud import insert_row,select_rows,select_row,delete_row,update_row
+
+from typing import Annotated
 
 from contextlib import asynccontextmanager
 
@@ -20,31 +22,22 @@ async def root():
 
 #Services endpoints
 
-@app.post('/service',response_model=ServiceResponse)
+@app.post('/services',response_model=ServiceResponse)
 async def create_service(service:CreateService,session:session_dep):
-    new_service=Service.model_validate(service)
-    session.add(new_service)
-    session.commit()
-    session.refresh(new_service)
-    return new_service
+    return insert_row(service,session,Service)
+    
 
 @app.get('/services/',response_model=list[ServiceResponse])
-async def get_services(session:session_dep):
-    service=session.exec(select(Service)).all()
-    return service
+async def get_services(session:session_dep,skip:int=0,limit:Annotated[int, Query(le=4)]=4):
+    return select_rows(session,Service)
 
-@app.get('/service/{service_id}',response_model=ServiceResponse)
+@app.get('/services/{service_id}',response_model=ServiceResponse)
 async def get_service(service_id:int,session:session_dep):
-    service=session.get(Service,service_id)
-    return service
+    return select_row(service_id,session,Service)
 
-#Barberos endpoints
+#Barbers endpoints
 
-@app.post('/barber',response_model=BarberResponse)
+@app.post('/barbers/',response_model=BarberResponse)
 async def create_barber(barber:CreateBarber,session:session_dep):
-    new_barber=Barber.model_validate(barber)
-    session.add(new_barber)
-    session.commit()
-    session.refresh(new_barber)
-    return new_barber
+    return insert_row(barber,session,Barber)
 
