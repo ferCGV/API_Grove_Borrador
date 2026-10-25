@@ -2,7 +2,7 @@ from sqlmodel import create_engine,Session,SQLModel
 from typing import Annotated
 from fastapi import Depends
 
-from models import User,Barber,Service
+from db.models import User,Barber,Service
 
 sqlite_file_name='database.db'
 sqlite_url=f'sqlite:///{sqlite_file_name}'
